@@ -5,31 +5,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   ShoppingCart, 
-  User, 
   Menu, 
   Search,
   Store, 
-  LogIn,
-  UserCircle
+  LogIn
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import { UserNav } from "./user-nav";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // This would come from your auth system
-  const [userRole, setUserRole] = useState<'client' | 'courier' | 'admin'>('client'); // This would come from your auth system
   const pathname = usePathname();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,17 +37,6 @@ export default function Header() {
     { name: "Ofertas", href: "/ofertas" },
     { name: "Tiendas", href: "/tiendas" },
   ];
-
-  const getDashboardLink = () => {
-    switch (userRole) {
-      case 'admin':
-        return '/admin/dashboard';
-      case 'courier':
-        return '/mensajero/dashboard';
-      default:
-        return '/perfil';
-    }
-  };
 
   return (
     <header className={cn(
@@ -107,40 +87,8 @@ export default function Header() {
               </Button>
             </Link>
             
-            {isLoggedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <UserCircle className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href={getDashboardLink()}>
-                      Panel de Control
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/perfil/pedidos">
-                      Mis Pedidos
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/perfil/configuracion">
-                      Configuración
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-red-500 cursor-pointer"
-                    onClick={() => setIsLoggedIn(false)}
-                  >
-                    Cerrar Sesión
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {user ? (
+              <UserNav />
             ) : (
               <Link href="/auth/login">
                 <Button variant="ghost" size="sm" className="gap-2">
@@ -197,22 +145,10 @@ export default function Header() {
                     </Button>
                   </Link>
                   
-                  {isLoggedIn ? (
-                    <>
-                      <Link href={getDashboardLink()}>
-                        <Button variant="ghost" className="w-full justify-start">
-                          <UserCircle className="h-5 w-5 mr-2" />
-                          Mi Cuenta
-                        </Button>
-                      </Link>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start text-red-500"
-                        onClick={() => setIsLoggedIn(false)}
-                      >
-                        Cerrar Sesión
-                      </Button>
-                    </>
+                  {user ? (
+                    <div className="pt-4">
+                      <UserNav />
+                    </div>
                   ) : (
                     <Link href="/auth/login">
                       <Button variant="ghost" className="w-full justify-start">
